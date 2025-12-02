@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第5章交互式图表演示</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .nav-tab {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-tab:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        main {
+            padding: 30px;
+        }
+        
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chart-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .chart-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .description {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .description h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+        
+        .grid-layout {
+            display: grid;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .grid-2x2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .grid-1x2 { grid-template-columns: 2fr 1fr; grid-template-rows: 2fr 1fr; }
+        .grid-1x1 { grid-template-columns: 1fr; }
+        
+        .chart-wrapper {
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .nav-tabs { flex-direction: column; align-items: center; }
+            .grid-2x2, .grid-1x2 { grid-template-columns: 1fr; }
+            header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 第5章交互式图表演示</h1>
+            <p>将Matplotlib静态图表转换为Plotly交互式组件</p>
+        </header>
+        
+        <nav>
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-section="section-51">5.1 固定区域子图</div>
+                <div class="nav-tab" data-section="section-52">5.2 自定义区域子图</div>
+                <div class="nav-tab" data-section="section-53">5.3 共享坐标轴</div>
+                <div class="nav-tab" data-section="section-54">5.4 子图布局</div>
+            </div>
+        </nav>
+        
+        <main>
+            <!-- 5.1 固定区域子图 -->
+            <div id="section-51" class="content-section active">
+                <div class="description">
+                    <h3>5.1 固定区域子图 - 概述</h3>
+                    <p>使用subplot()和subplots()创建规则布局的子图，支持等分区域的图表排列。</p>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">产品A与产品B销售额对比</div>
+                    <div class="grid-layout grid-2x2">
+                        <div id="chart51-1" class="chart-wrapper"></div>
+                        <div id="chart51-2" class="chart-wrapper"></div>
+                        <div id="chart51-3" class="chart-wrapper"></div>
+                        <div id="chart51-4" class="chart-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 5.2 自定义区域子图 -->
+            <div id="section-52" class="content-section">
+                <div class="description">
+                    <h3>5.2 自定义区域子图 - 概述</h3>
+                    <p>使用subplot2grid()创建不规则布局的子图，可以跨行跨列实现复杂布局。</p>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">2017年与2018年抖音用户分析</div>
+                    <div class="grid-layout grid-1x2">
+                        <div id="chart52-1" class="chart-wrapper" style="grid-row: 1; grid-column: 1 / span 2;"></div>
+                        <div id="chart52-2" class="chart-wrapper" style="grid-row: 2; grid-column: 1;"></div>
+                        <div id="chart52-3" class="chart-wrapper" style="grid-row: 2; grid-column: 2;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 5.3 共享坐标轴 -->
+            <div id="section-53" class="content-section">
+                <div class="description">
+                    <h3>5.3 共享坐标轴 - 概述</h3>
+                    <p>多个子图共享同一坐标轴，便于数据对比分析。</p>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">气温与降水量、蒸发量的关系</div>
+                    <div id="chart53" class="chart-wrapper" style="height: 500px;"></div>
+                </div>
+            </div>
+            
+            <!-- 5.4 子图布局 -->
+            <div id="section-54" class="content-section">
+                <div class="description">
+                    <h3>5.4 子图布局 - 概述</h3>
+                    <p>灵活的子图布局方式：约束布局、紧密布局、自定义布局。</p>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">2018年上半年汽车销售情况</div>
+                    <div class="grid-layout grid-2x2">
+                        <div id="chart54-1" class="chart-wrapper" style="grid-column: 1 / span 2;"></div>
+                        <div id="chart54-2" class="chart-wrapper"></div>
+                        <div id="chart54-3" class="chart-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 数据定义
+        const chartData = {
+            // 5.1 产品销售数据
+            productSales: {
+                months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                productA: [20, 28, 23, 16, 29, 36, 39, 33, 31, 19, 21, 25],
+                productB: [17, 22, 39, 26, 35, 23, 25, 27, 29, 38, 28, 20]
+            },
+            
+            // 5.2 抖音用户数据
+            douyinData: {
+                labels: ['一线城市', '二线城市', '三线城市', '四线及以外', '其他国家及地区'],
+                growth2017: [21, 35, 22, 19, 3],
+                growth2018: [13, 32, 27, 27, 1],
+                growthMultiple: [51, 73, 99, 132, 45],
+                distribution2017: [21, 35, 22, 19, 3],
+                distribution2018: [13, 32, 27, 27, 1]
+            },
+            
+            // 5.3 气象数据
+            weatherData: {
+                months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                temperature: [2.0, 2.2, 3.3, 4.5, 6.3, 10.2, 20.3, 33.4, 23.0, 16.5, 12.0, 6.2],
+                precipitation: [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3],
+                evaporation: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3]
+            },
+            
+            // 5.4 汽车销售数据
+            carSales: {
+                months: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                sales: [2150, 1050, 1560, 1480, 1530, 1490],
+                cities: ['北京', '上海', '广州', '深圳', '浙江', '山东'],
+                salesCount: [83775, 62860, 59176, 64205, 48671, 39968]
+            }
+        };
+        
+        // 导航切换功能
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有active类
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                
+                // 添加active类到当前选中的
+                this.classList.add('active');
+                const sectionId = this.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+                
+                // 初始化对应部分的图表
+                initializeSection(sectionId);
+            });
+        });
+        
+        // 初始化对应部分的图表
+        function initializeSection(sectionId) {
+            switch(sectionId) {
+                case 'section-51':
+                    updateChart51();
+                    break;
+                case 'section-52':
+                    updateChart52();
+                    break;
+                case 'section-53':
+                    updateChart53();
+                    break;
+                case 'section-54':
+                    updateChart54();
+                    break;
+            }
+        }
+        
+        // 5.1 固定区域子图功能
+        function updateChart51() {
+            const data = chartData.productSales;
+            
+            // 第一个子图：折线图
+            const trace1 = {
+                x: data.months,
+                y: data.productA,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: '产品A',
+                line: { color: 'magenta', width: 2 },
+                marker: { size: 5 }
+            };
+            
+            const trace2 = {
+                x: data.months,
+                y: data.productB,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: '产品B',
+                line: { color: 'green', width: 2 },
+                marker: { size: 5 }
+            };
+            
+            Plotly.newPlot('chart51-1', [trace1, trace2], {
+                title: '产品A与产品B的销售额',
+                xaxis: { title: '月份' },
+                yaxis: { title: '销售额(亿元)', range: [10, 45] },
+                margin: { t: 40, r: 20, b: 60, l: 60 }
+            });
+            
+            // 第二个子图：产品A饼图
+            const pie1 = {
+                labels: data.months,
+                values: data.productA,
+                type: 'pie',
+                name: '产品A销售额',
+                hole: 0.5,
+                marker: { colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52D726'] }
+            };
+            
+            Plotly.newPlot('chart51-2', [pie1], {
+                title: '产品A的销售额',
+                margin: { t: 40, r: 20, b: 20, l: 20 }
+            });
+            
+            // 第三个子图：产品B饼图
+            const pie2 = {
+                labels: data.months,
+                values: data.productB,
+                type: 'pie',
+                name: '产品B销售额',
+                hole: 0.5,
+                marker: { colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52D726'] }
+            };
+            
+            Plotly.newPlot('chart51-3', [pie2], {
+                title: '产品B的销售额',
+                margin: { t: 40, r: 20, b: 20, l: 20 }
+            });
+            
+            // 第四个子图：空的（保持布局一致性）
+            Plotly.newPlot('chart51-4', [], {
+                title: '预留位置',
+                margin: { t: 40, r: 20, b: 20, l: 20 }
+            });
+        }
+        
+        // 5.2 自定义区域子图功能
+        function updateChart52() {
+            const data = chartData.douyinData;
+            
+            // 第一个大子图：增长倍数柱状图
+            const growthTrace = {
+                x: data.labels,
+                y: data.growthMultiple,
+                type: 'bar',
+                name: '增长倍数',
+                marker: { color: '#20B2AA', width: 0.5 }
+            };
+            
+            // 添加平均线
+            const averageLine = {
+                x: data.labels,
+                y: Array(data.labels.length).fill(75),
+                type: 'scatter',
+                mode: 'lines',
+                name: '平均增长倍数',
+                line: { color: 'gray', width: 1, dash: 'dash' }
+            };
+            
+            Plotly.newPlot('chart52-1', [growthTrace, averageLine], {
+                title: '抖音2018vs2017人群增长倍数',
+                xaxis: { title: '地区' },
+                yaxis: { title: '增长倍数', range: [0, 160] },
+                margin: { t: 40, r: 20, b: 80, l: 60 }
+            });
+            
+            // 第二个子图：2017年用户分布
+            const pie2017 = {
+                labels: data.labels,
+                values: data.distribution2017,
+                type: 'pie',
+                name: '2017年抖音用户地区分布',
+                marker: { colors: ['#2F4F4F', '#FF0000', '#A9A9A9', '#FFD700', '#B0C4DE'] }
+            };
+            
+            Plotly.newPlot('chart52-2', [pie2017], {
+                title: '2017年抖音用户地区分布的比例',
+                margin: { t: 40, r: 20, b: 20, l: 20 }
+            });
+            
+            // 第三个子图：2018年用户分布
+            const pie2018 = {
+                labels: data.labels,
+                values: data.distribution2018,
+                type: 'pie',
+                name: '2018年抖音用户地区分布',
+                marker: { colors: ['#2F4F4F', '#FF0000', '#A9A9A9', '#FFD700', '#B0C4DE'] }
+            };
+            
+            Plotly.newPlot('chart52-3', [pie2018], {
+                title: '2018年抖音用户地区分布的比例',
+                margin: { t: 40, r: 20, b: 20, l: 20 }
+            });
+        }
+        
+        // 5.3 共享坐标轴子图功能
+        function updateChart53() {
+            const data = chartData.weatherData;
+            const traces = [];
+            
+            // 堆叠柱状图 - 降水量和蒸发量
+            traces.push({
+                x: data.months,
+                y: data.evaporation,
+                type: 'bar',
+                name: '蒸发量',
+                marker: { color: 'orange' }
+            });
+            
+            traces.push({
+                x: data.months,
+                y: data.precipitation,
+                type: 'bar',
+                name: '降水量',
+                marker: { color: 'green' }
+            });
+            
+            // 线图 - 气温（使用次坐标轴）
+            traces.push({
+                x: data.months,
+                y: data.temperature,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: '平均气温',
+                yaxis: 'y2',
+                line: { color: 'magenta', width: 2 },
+                marker: { size: 6, symbol: 'circle' }
+            });
+            
+            const layout = {
+                title: '平均气温与降水量、蒸发量的关系',
+                xaxis: { title: '月份' },
+                yaxis: {
+                    title: '水量 (ml)',
+                    titlefont: { color: '#1f77b4' },
+                    tickfont: { color: '#1f77b4' }
+                },
+                yaxis2: {
+                    title: '气温(°C)',
+                    titlefont: { color: '#ff7f0e' },
+                    tickfont: { color: '#ff7f0e' },
+                    overlaying: 'y',
+                    side: 'right'
+                },
+                barmode: 'stack',
+                legend: {
+                    x: 0.02,
+                    y: 0.98,
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: '#333',
+                    borderwidth: 1
+                },
+                margin: { t: 50, r: 60, b: 60, l: 80 }
+            };
+            
+            Plotly.newPlot('chart53', traces, layout);
+        }
+        
+        // 5.4 子图布局功能
+        function updateChart54() {
+            const data = chartData.carSales;
+            
+            // 第一个子图：月度销售额柱状图（占据整行）
+            const salesTrace = {
+                x: data.months,
+                y: data.sales,
+                type: 'bar',
+                name: '销售额',
+                marker: { color: '#3299CC', width: 0.5 }
+            };
+            
+            const layout1 = {
+                title: '2018年上半年某品牌汽车的销售额',
+                yaxis: { title: '销售额(亿元)' },
+                margin: { t: 40, r: 20, b: 60, l: 60 }
+            };
+            
+            Plotly.newPlot('chart54-1', [salesTrace], layout1);
+            
+            // 第二个子图：分公司销量折线图
+            const salesCountTrace = {
+                x: data.cities,
+                y: data.salesCount,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: '销量',
+                line: { color: 'magenta', width: 2 },
+                marker: { size: 8 }
+            };
+            
+            const layout2 = {
+                title: '分公司某品牌汽车的销量',
+                yaxis: { title: '销量(辆)' },
+                margin: { t: 40, r: 20, b: 60, l: 60 }
+            };
+            
+            Plotly.newPlot('chart54-2', [salesCountTrace], layout2);
+            
+            // 第三个子图：分公司销量堆叠面积图
+            const stackTrace = {
+                x: data.cities,
+                y: data.salesCount,
+                type: 'scatter',
+                mode: 'none',
+                fill: 'tozeroy',
+                name: '销量',
+                fillcolor: 'rgba(153, 153, 255, 0.5)'
+            };
+            
+            const layout3 = {
+                title: '分公司某品牌汽车的销量',
+                yaxis: { title: '销量(辆)' },
+                margin: { t: 40, r: 20, b: 60, l: 60 }
+            };
+            
+            Plotly.newPlot('chart54-3', [stackTrace], layout3);
+        }
+        
+        // 页面加载时初始化第一个部分
+        document.addEventListener('DOMContentLoaded', function() {
+            updateChart51();
+        });
+    </script>
+</body>
+</html>
