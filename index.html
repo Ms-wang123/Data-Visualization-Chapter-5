@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化第5章 - 交互式图表演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .demo-section {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .demo-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .demo-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            min-width: 250px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        
+        .demo-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .demo-card p {
+            opacity: 0.9;
+        }
+        
+        .demo-card.gradient-2 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .description {
+            background: #f8f9fa;
+            padding: 30px;
+            margin: 20px 40px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 数据可视化第5章</h1>
+            <p>交互式图表演示项目</p>
+        </header>
+        
+        <section class="demo-section">
+            <h2>🎯 交互式图表演示</h2>
+            <div class="description">
+                <p>本项目展示了多种交互式图表的实现，包括缩放、悬停提示、数据筛选等功能。基于Plotly.js和Chart.js等现代可视化库构建。</p>
+            </div>
+            
+            <div class="demo-links">
+                <a href="interactive_charts_demo.html" class="demo-card">
+                    <h3>📈 综合交互图表</h3>
+                    <p>包含多种交互式图表的综合演示</p>
+                </a>
+                
+                <a href="interactive_chart5.html" class="demo-card gradient-2">
+                    <h3>🎨 专项图表演示</h3>
+                    <p>特定类型的交互式图表展示</p>
+                </a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
